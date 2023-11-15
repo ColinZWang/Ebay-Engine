@@ -17,6 +17,9 @@ struct ContentView: View {
     @State private var pickup: Bool = false
     @State private var distance: String = "10"
     @State private var customLocation: Bool = false
+    @State private var zipCode: String = ""
+    // Categories array
+    let categories = ["All", "Art", "Baby", "Books", "Clothing, Shoes & Accessories", "Computers/Tablets & Networking", "Health & Beauty", "Music", "Video Games & Consoles"]
 
     var body: some View {
         NavigationView {
@@ -26,15 +29,18 @@ struct ContentView: View {
                         Text("Keyword:")
                         TextField("Required", text: $keyword)
                     }
+                    
                     VStack{
                         Spacer()
                         Picker("Category", selection: $selectedCategory) {
-                            Text("All").tag("All")
-                            // Add more categories here
+                            ForEach(categories, id: \.self) { category in
+                                Text(category).tag(category)
+                            }
                         }
                         Spacer()
                     }
                     .pickerStyle(MenuPickerStyle())
+                    
                     VStack {
                         Spacer()
                         Text("Condition")
@@ -47,6 +53,7 @@ struct ContentView: View {
                             }
                         Spacer()
                     }
+                    
                     VStack {
                         Spacer()
                         Text("Shipping")
@@ -58,6 +65,7 @@ struct ContentView: View {
                             }
                         Spacer()
                     }
+                    
                     HStack {
                         Text("Distance:")
                         Spacer()
@@ -66,6 +74,14 @@ struct ContentView: View {
                     }
                     
                     Toggle("Custom Location", isOn: $customLocation)
+                                    
+                    if customLocation {
+                        HStack {
+                            Text("Zipcode:")
+                            TextField("Enter zip code", text: $zipCode)
+                                .keyboardType(.numberPad)
+                        }
+                    }
                     
                     HStack {
                         Spacer()
