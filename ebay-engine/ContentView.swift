@@ -15,10 +15,9 @@ struct ContentView: View {
     @State private var conditionUnspecified: Bool = false
     @State private var freeShipping: Bool = false
     @State private var pickup: Bool = false
-    @State private var distance: String = "10"
+    @State private var distance: String = ""
     @State private var customLocation: Bool = false
     @State private var zipCode: String = ""
-    // Categories array
     let categories = ["All", "Art", "Baby", "Books", "Clothing, Shoes & Accessories", "Computers/Tablets & Networking", "Health & Beauty", "Music", "Video Games & Consoles"]
 
     var body: some View {
@@ -47,12 +46,14 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                         Spacer()
                         HStack {
-                            CheckboxField(checked: $conditionUsed, title: "Used")
-                            CheckboxField(checked: $conditionNew, title: "New")
-                            CheckboxField(checked: $conditionUnspecified, title: "Unspecified")
-                            }
+                            Toggle("Used", isOn: $conditionUsed)
+                            Toggle("New", isOn: $conditionNew)
+                            Toggle("Unspecified", isOn: $conditionUnspecified)
+                        }
+                            .toggleStyle(ChecklistToggleStyle())
                         Spacer()
                     }
+
                     
                     VStack {
                         Spacer()
@@ -60,9 +61,10 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                         Spacer()
                         HStack {
-                            CheckboxField(checked: $pickup, title: "Pickup")
-                            CheckboxField(checked: $freeShipping, title: "Free Shipping")
+                            Toggle("Pickup", isOn: $pickup)
+                            Toggle("Free Shipping", isOn: $freeShipping)
                             }
+                            .toggleStyle(ChecklistToggleStyle())
                         Spacer()
                     }
                     
@@ -110,6 +112,22 @@ struct ContentView: View {
         }
     }
 }
+
+
+struct ChecklistToggleStyle: ToggleStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack {
+            Image(systemName: configuration.isOn ? "checkmark.square.fill" : "square")
+                .resizable()
+                .frame(width: 16, height: 16)
+                .foregroundColor(configuration.isOn ? .blue : .gray)
+                .onTapGesture { configuration.isOn.toggle() }
+            configuration.label
+        }
+    }
+}
+
+
 
 struct CheckboxField: View {
     @Binding var checked: Bool
