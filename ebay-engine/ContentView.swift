@@ -129,24 +129,6 @@ struct ChecklistToggleStyle: ToggleStyle {
 
 
 
-struct CheckboxField: View {
-    @Binding var checked: Bool
-    var title: String
-
-    var body: some View {
-        Button(action: {
-            self.checked.toggle()
-        }) {
-            HStack {
-                Image(systemName: checked ? "checkmark.square.fill" : "square")
-                    .foregroundColor(.gray)
-                Text(title)
-                    .foregroundColor(.black)
-            }
-        }
-    }
-}
-
 
 #Preview {
     ContentView()
