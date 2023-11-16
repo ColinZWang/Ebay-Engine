@@ -97,8 +97,18 @@ struct ContentView: View {
                         .cornerRadius(10)
                         Spacer()
                         Button("Clear") {
-                            // Clear action
+                            keyword = ""
+                            selectedCategory = "All"
+                            conditionNew = false
+                            conditionUsed = false
+                            conditionUnspecified = false
+                            freeShipping = false
+                            pickup = false
+                            distance = ""
+                            customLocation = false
+                            zipCode = ""
                         }
+
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.blue)
