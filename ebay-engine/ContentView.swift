@@ -20,6 +20,7 @@ struct ContentView: View {
     @State private var zipCode: String = ""
     @State private var keywordWarning: Bool = false
     let categories = ["All", "Art", "Baby", "Books", "Clothing, Shoes & Accessories", "Computers/Tablets & Networking", "Health & Beauty", "Music", "Video Games & Consoles"]
+    
 
     var body: some View {
         ZStack {
@@ -89,18 +90,16 @@ struct ContentView: View {
                             Spacer()
                             
                             Button("Submit") {
-                                let keyword_trimmed = keyword.trimmingCharacters(in: .whitespacesAndNewlines)
-                                print("Keyword: \(keyword_trimmed)")
-                                let isKeywordEmpty = keyword_trimmed.isEmpty
                                 print("Clicking Submit Button")
-                                print("Keyword empty: \(isKeywordEmpty)")
-                                if isKeywordEmpty {
+                                if keyword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                     keywordWarning = true
                                 } else {
                                     keywordWarning = false
-                                    // Proceed with normal submission
+                                    print("Performing Search")
+                                    performSearch()
                                 }
                             }
+
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.blue)
@@ -125,7 +124,6 @@ struct ContentView: View {
                                 customLocation = false
                                 zipCode = ""
                                 keywordWarning = false
-                                print("Keyword empty: \(keywordWarning)")
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
@@ -152,6 +150,33 @@ struct ContentView: View {
                 .edgesIgnoringSafeArea(.bottom)
             }
         }
+    }
+    
+    func performSearch() {
+        guard let url = URL(string: "http://localhost:8080/search") else { return }
+        
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        var queryItems = [URLQueryItem]()
+        
+        queryItems.append(URLQueryItem(name: "keyword", value: keyword))
+        queryItems.append(URLQueryItem(name: "category", value: selectedCategory))
+        // Add other parameters similarly
+        
+        components?.queryItems = queryItems
+        
+        guard let finalURL = components?.url else { return }
+        
+        URLSession.shared.dataTask(with: finalURL) { data, response, error in
+            if let error = error {
+                print("Error making request: \(error)")
+                return
+            }
+            if let data = data {
+                if let responseString = String(data: data, encoding: .utf8) {
+                    print("Response: \(responseString)")
+                }
+            }
+        }.resume()
     }
 }
 
