@@ -26,140 +26,140 @@ struct ContentView: View {
     
 
     var body: some View {
-        GeometryReader { geometry in
-            ScrollView {
-                VStack(spacing: 0) {
+        NavigationView {
+            Form{
+                VStack{
                     searchForm
-                        .frame(height: geometry.size.height * 0.8)
-                    resultsList
-                        .frame(minHeight: geometry.size.height)
+                    if showingResults{
+                        resultsList
+                    }
                 }
             }
+            .navigationBarTitle("Product Search")
         }
     }
 
     
     
     var searchForm: some View{
-        ZStack{
-            NavigationView {
-                Form {
-                    Section() {
-                        HStack {
-                            Text("Keyword:")
-                            TextField("Required", text: $keyword)
-                        }
-                        VStack{
-                            Spacer()
-                            Picker("Category", selection: $selectedCategory) {
-                                ForEach(categories, id: \.self) { category in
-                                    Text(category).tag(category)
-                                }
-                            }
-                            Spacer()
-                        }
-                        .pickerStyle(MenuPickerStyle())
-                        
-                        VStack {
-                            Spacer()
-                            Text("Condition")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            Spacer()
-                            HStack {
-                                Toggle("Used", isOn: $conditionUsed)
-                                Toggle("New", isOn: $conditionNew)
-                                Toggle("Unspecified", isOn: $conditionUnspecified)
-                            }
-                            .toggleStyle(ChecklistToggleStyle())
-                            Spacer()
-                        }
-                        
-                        VStack {
-                            Spacer()
-                            Text("Shipping")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            Spacer()
-                            HStack {
-                                Toggle("Pickup", isOn: $pickup)
-                                Toggle("Free Shipping", isOn: $freeShipping)
-                            }
-                            .toggleStyle(ChecklistToggleStyle())
-                            Spacer()
-                        }
-                        
-                        HStack {
-                            Text("Distance:")
-                            Spacer()
-                            TextField("10", text: $distance)
-                                .keyboardType(.numberPad)
-                        }
-                        
-                        Toggle("Custom Location", isOn: $customLocation)
-                        
-                        if customLocation {
-                            HStack {
-                                Text("Zipcode:")
-                                TextField("Enter zip code", text: $zipCode)
-                                    .keyboardType(.numberPad)
-                            }
-                        }
-                        
-                        HStack {
-                            Spacer()
-                            
-                            Button("Submit") {
-                                print("Clicking Submit Button \n")
-                                if keyword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                    keywordWarning = true
-                                } else {
-                                    keywordWarning = false
-                                    print("Performing Search")
-                                    performSearch()
-                                }
-                            }
-                            
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                            .buttonStyle(BorderlessButtonStyle())
-                            
-                            
-                            
-                            Spacer()
-                            
-                            Button("Clear") {
-                                print("Clicking Clear Button \n")
-                                keyword = ""
-                                selectedCategory = "All"
-                                conditionNew = false
-                                conditionUsed = false
-                                conditionUnspecified = false
-                                freeShipping = false
-                                pickup = false
-                                distance = ""
-                                customLocation = false
-                                zipCode = ""
-                                keywordWarning = false
-                                showingResults = false
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                            .buttonStyle(BorderlessButtonStyle())
-                            
-                            
-                            
-                            Spacer()
+         Section(){
+             VStack(spacing:18) {
+                HStack {
+                    Text("Keyword:")
+                    TextField("Required", text: $keyword)
+                }
+                
+                Divider()
+                
+                VStack{
+                    Picker("Category", selection: $selectedCategory) {
+                        ForEach(categories, id: \.self) { category in
+                            Text(category).tag(category)
                         }
                     }
                 }
-                .navigationBarTitle("Product Search")
+                .pickerStyle(MenuPickerStyle())
+                
+                Divider()
+
+                VStack {
+                    Text("Condition")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack {
+                        Toggle("Used", isOn: $conditionUsed)
+                        Toggle("New", isOn: $conditionNew)
+                        Toggle("Unspecified", isOn: $conditionUnspecified)
+                    }
+                    .toggleStyle(ChecklistToggleStyle())
+                }
+                
+                Divider()
+                
+                VStack {
+                    Text("Shipping")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack {
+                        Toggle("Pickup", isOn: $pickup)
+                        Toggle("Free Shipping", isOn: $freeShipping)
+                    }
+                    .toggleStyle(ChecklistToggleStyle())
+                }
+                
+                Divider()
+                
+                HStack {
+                    Text("Distance:")
+                    Spacer()
+                    TextField("10", text: $distance)
+                        .keyboardType(.numberPad)
+                }
+                
+                Divider()
+                
+                Toggle("Custom Location", isOn: $customLocation)
+                
+                Divider()
+
+                if customLocation {
+                    HStack {
+                        Text("Zipcode:")
+                        TextField("Enter zip code", text: $zipCode)
+                            .keyboardType(.numberPad)
+                    }
+                }
+                
+                HStack {
+                    Spacer()
+                    
+                    Button("Submit") {
+                        print("Clicking Submit Button \n")
+                        if keyword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            keywordWarning = true
+                        } else {
+                            keywordWarning = false
+                            print("Performing Search")
+                            performSearch()
+                        }
+                    }
+                    
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .buttonStyle(BorderlessButtonStyle())
+                    
+                    
+                    
+                    Spacer()
+                    
+                    Button("Clear") {
+                        print("Clicking Clear Button \n")
+                        keyword = ""
+                        selectedCategory = "All"
+                        conditionNew = false
+                        conditionUsed = false
+                        conditionUnspecified = false
+                        freeShipping = false
+                        pickup = false
+                        distance = ""
+                        customLocation = false
+                        zipCode = ""
+                        keywordWarning = false
+                        showingResults = false
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .buttonStyle(BorderlessButtonStyle())
+                    
+                    
+                    
+                    Spacer()
+                }
             }
-            
             if keywordWarning {
                 VStack {
                     Spacer() // Pushes the warning view to the bottom
@@ -168,13 +168,12 @@ struct ContentView: View {
                 }
                 .edgesIgnoringSafeArea(.bottom)
             }
-            
         }
     }
     
     var resultsList: some View{
         Group{
-            if showingResults {
+            Section{
                 List(searchResults, id: \.itemId) { result in
                     HStack {
                         // Displaying the image from the URL
@@ -204,8 +203,6 @@ struct ContentView: View {
                         }
                     }
                 }
-            } else {
-                EmptyView()
             }
         }
     }
