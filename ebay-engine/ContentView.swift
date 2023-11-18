@@ -149,6 +149,7 @@ struct ContentView: View {
                 }
                 .edgesIgnoringSafeArea(.bottom)
             }
+            
         }
     }
     
@@ -160,8 +161,22 @@ struct ContentView: View {
         
         queryItems.append(URLQueryItem(name: "keyword", value: keyword))
         queryItems.append(URLQueryItem(name: "category", value: selectedCategory))
-        // Add other parameters similarly
-        
+        if conditionUsed { queryItems.append(URLQueryItem(name: "usedCondition", value: "true")) }
+            if conditionNew { queryItems.append(URLQueryItem(name: "newCondition", value: "true")) }
+            if conditionUnspecified { queryItems.append(URLQueryItem(name: "unspecifiedCondition", value: "true")) }
+
+            // Adding shipping filters
+            if pickup { queryItems.append(URLQueryItem(name: "localpickup", value: "true")) }
+            if freeShipping { queryItems.append(URLQueryItem(name: "freeshipping", value: "true")) }
+
+            // Adding distance
+            if !distance.isEmpty { queryItems.append(URLQueryItem(name: "distance", value: distance)) }
+
+            // Adding custom location zip code
+        if customLocation && !zipCode.isEmpty { queryItems.append(URLQueryItem(name: "zipcode", value: zipCode)) }else{
+            queryItems.append(URLQueryItem(name: "zipcode", value: "90001")) // Will implement user location later
+        }
+
         components?.queryItems = queryItems
         
         guard let finalURL = components?.url else { return }
@@ -202,7 +217,6 @@ struct WarningView: View {
             .cornerRadius(10)
     }
 }
-
 
 
 #Preview {
