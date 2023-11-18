@@ -31,6 +31,16 @@ struct ContentView: View {
                 Section{
                     searchForm
                 }
+                Section{
+                    if keywordWarning {
+                        VStack {
+                            Spacer() // Pushes the warning view to the bottom
+                            WarningView()
+                                .padding(.bottom, 30) // Add padding for better positioning
+                        }
+                        .edgesIgnoringSafeArea(.bottom)
+                    }
+                }
                 if showingResults{
                     Section{
                         resultsList
@@ -162,14 +172,6 @@ struct ContentView: View {
                     
                     Spacer()
                 }
-            }
-            if keywordWarning {
-                VStack {
-                    Spacer() // Pushes the warning view to the bottom
-                    WarningView()
-                        .padding(.bottom, 30) // Add padding for better positioning
-                }
-                .edgesIgnoringSafeArea(.bottom)
             }
         }
     }
