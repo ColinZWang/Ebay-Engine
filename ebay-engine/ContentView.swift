@@ -117,6 +117,7 @@ struct ContentView: View {
                         print("Clicking Submit Button \n")
                         if keyword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             keywordWarning = true
+                            showingResults = false
                         } else {
                             keywordWarning = false
                             print("Performing Search")
@@ -174,37 +175,58 @@ struct ContentView: View {
     }
     
     var resultsList: some View{
-        Group{
-            Section{
-                List(searchResults, id: \.itemId) { result in
-                    HStack {
-                        // Displaying the image from the URL
-                        if let imageUrlString = result.image, let imageUrl = URL(string: imageUrlString) {
-                            AsyncImage(url: imageUrl) { phase in
-                                if let image = phase.image {
-                                    image.resizable().aspectRatio(contentMode: .fit)
-                                } else if phase.error != nil {
-                                    Color.red // Error placeholder
-                                } else {
-                                    Color.blue // Loading placeholder
-                                }
+        Section(header: Text("Results").font(.system(size:28, weight: .bold))){
+            List(searchResults, id: \.itemId) { result in
+                HStack {
+                    // Displaying the image from the URL
+                    if let imageUrlString = result.image, let imageUrl = URL(string: imageUrlString) {
+                        AsyncImage(url: imageUrl) { phase in
+                            if let image = phase.image {
+                                image.resizable().aspectRatio(contentMode: .fit)
+                            } else if phase.error != nil {
+                                Color.red // Error placeholder
+                            } else {
+                                Color.blue // Loading placeholder
                             }
+                        }
+                        .frame(width: 50, height: 50)
+                        .cornerRadius(8)
+                    } else {
+                        Color.gray // Placeholder for missing image
                             .frame(width: 50, height: 50)
                             .cornerRadius(8)
-                        } else {
-                            Color.gray // Placeholder for missing image
-                                .frame(width: 50, height: 50)
-                                .cornerRadius(8)
-                        }
-                        
-                        VStack(alignment: .leading) {
-                            Text(result.title ?? "Unknown Title")
-                            Text("Price: \(result.price ?? "N/A")")
-                            Text("Shipping: \(result.shipping ?? "N/A")")
-                            Text("Zip: \(result.zip ?? "N/A")")
-                        }
                     }
-                }
+                    
+                    VStack(alignment: .leading) {
+                        Text(result.title ?? "Unknown Title")
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                        if let price = result.price {
+                            Text("$\(price)")
+                                .foregroundColor(.blue)
+                                .fontWeight(.bold)
+                        } else {
+                            Text("N/A")
+                                .foregroundColor(.blue)
+                        }
+                        Text(result.shipping ?? "N/A")
+                            .foregroundColor(.gray)
+                        Text(result.zip ?? "N/A")
+                            .foregroundColor(.gray)
+                    }
+                    Spacer()
+                    VStack{
+                        Spacer()
+                        HStack{
+                            Image(systemName: "heart")
+                                .foregroundColor(.red)
+                            Image(systemName: "chevron.right")
+                        }
+                        Spacer()
+                        Text(result.condition ?? "N/A")
+                            .foregroundColor(.gray)
+                    }
+}
             }
         }
     }
@@ -291,6 +313,7 @@ struct SearchResult: Identifiable, Decodable {
     let price: String?
     let shipping: String?
     let zip: String?
+    let condition: String?
     // Any other fields you want to include, set them as optional
 }
 
