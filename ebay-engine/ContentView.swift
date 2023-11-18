@@ -31,16 +31,6 @@ struct ContentView: View {
                 Section{
                     searchForm
                 }
-                Section{
-                    if keywordWarning {
-                        VStack {
-                            Spacer() // Pushes the warning view to the bottom
-                            WarningView()
-                                .padding(.bottom, 30) // Add padding for better positioning
-                        }
-                        .edgesIgnoringSafeArea(.bottom)
-                    }
-                }
                 if showingResults{
                     Section{
                         resultsList
@@ -48,6 +38,9 @@ struct ContentView: View {
                 }
             }
             .navigationBarTitle("Product Search")
+            .overlay(
+                keywordWarning ? WarningView().position(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height * 0.75) : nil
+                    )
         }
     }
 
@@ -299,7 +292,7 @@ struct ChecklistToggleStyle: ToggleStyle {
 
 struct WarningView: View {
     var body: some View {
-        Text("Keyword is mandatory.")
+        Text("Keyword is mandatory")
             .foregroundColor(.white)
             .padding()
             .background(Color.black)
