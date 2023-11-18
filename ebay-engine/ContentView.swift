@@ -20,6 +20,9 @@ struct ContentView: View {
     @State private var zipCode: String = ""
     @State private var keywordWarning: Bool = false
     let categories = ["All", "Art", "Baby", "Books", "Clothing, Shoes & Accessories", "Computers/Tablets & Networking", "Health & Beauty", "Music", "Video Games & Consoles"]
+    @State private var searchResults: [SearchResult] = []
+    @State private var showingResults = false
+
     
 
     var body: some View {
@@ -149,8 +152,40 @@ struct ContentView: View {
                 }
                 .edgesIgnoringSafeArea(.bottom)
             }
-            
+            if showingResults {
+                List(searchResults, id: \.itemId) { result in
+                    HStack {
+                        // Displaying the image from the URL
+                        if let imageUrlString = result.image, let imageUrl = URL(string: imageUrlString) {
+                            AsyncImage(url: imageUrl) { phase in
+                                if let image = phase.image {
+                                    image.resizable().aspectRatio(contentMode: .fit)
+                                } else if phase.error != nil {
+                                    Color.red // Error placeholder
+                                } else {
+                                    Color.blue // Loading placeholder
+                                }
+                            }
+                            .frame(width: 50, height: 50)
+                            .cornerRadius(8)
+                        } else {
+                            Color.gray // Placeholder for missing image
+                                .frame(width: 50, height: 50)
+                                .cornerRadius(8)
+                        }
+
+                        VStack(alignment: .leading) {
+                            Text(result.title ?? "Unknown Title")
+                            Text("Price: \(result.price ?? "N/A")")
+                            Text("Shipping: \(result.shipping ?? "N/A")")
+                            Text("Zip: \(result.zip ?? "N/A")")
+                        }
+                    }
+                }
+            }
+
         }
+
     }
     
     func performSearch() {
@@ -182,16 +217,22 @@ struct ContentView: View {
         guard let finalURL = components?.url else { return }
         
         URLSession.shared.dataTask(with: finalURL) { data, response, error in
-            if let error = error {
-                print("Error making request: \(error)")
-                return
-            }
-            if let data = data {
-                if let responseString = String(data: data, encoding: .utf8) {
-                    print("Response: \(responseString)")
+                if let error = error {
+                    print("Error making request: \(error)")
+                    return
                 }
-            }
-        }.resume()
+                if let data = data {
+                    do {
+                        let results = try JSONDecoder().decode([SearchResult].self, from: data)
+                        DispatchQueue.main.async {
+                            self.searchResults = results
+                            self.showingResults = true
+                        }
+                    } catch {
+                        print("JSON Decoding Error: \(error)")
+                    }
+                }
+            }.resume()
     }
 }
 
@@ -216,6 +257,17 @@ struct WarningView: View {
             .background(Color.black)
             .cornerRadius(10)
     }
+}
+
+struct SearchResult: Identifiable, Decodable {
+    var id: String { itemId }
+    let itemId: String
+    let image: String?
+    let title: String?
+    let price: String?
+    let shipping: String?
+    let zip: String?
+    // Any other fields you want to include, set them as optional
 }
 
 
