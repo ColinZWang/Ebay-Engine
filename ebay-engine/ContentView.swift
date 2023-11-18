@@ -28,9 +28,11 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             Form{
-                VStack{
+                Section{
                     searchForm
-                    if showingResults{
+                }
+                if showingResults{
+                    Section{
                         resultsList
                     }
                 }
