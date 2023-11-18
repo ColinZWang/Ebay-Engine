@@ -26,7 +26,22 @@ struct ContentView: View {
     
 
     var body: some View {
-        ZStack {
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(spacing: 0) {
+                    searchForm
+                        .frame(height: geometry.size.height * 0.8)
+                    resultsList
+                        .frame(minHeight: geometry.size.height)
+                }
+            }
+        }
+    }
+
+    
+    
+    var searchForm: some View{
+        ZStack{
             NavigationView {
                 Form {
                     Section() {
@@ -58,7 +73,7 @@ struct ContentView: View {
                             .toggleStyle(ChecklistToggleStyle())
                             Spacer()
                         }
-
+                        
                         VStack {
                             Spacer()
                             Text("Shipping")
@@ -71,14 +86,14 @@ struct ContentView: View {
                             .toggleStyle(ChecklistToggleStyle())
                             Spacer()
                         }
-
+                        
                         HStack {
                             Text("Distance:")
                             Spacer()
                             TextField("10", text: $distance)
                                 .keyboardType(.numberPad)
                         }
-
+                        
                         Toggle("Custom Location", isOn: $customLocation)
                         
                         if customLocation {
@@ -88,12 +103,12 @@ struct ContentView: View {
                                     .keyboardType(.numberPad)
                             }
                         }
-
+                        
                         HStack {
                             Spacer()
                             
                             Button("Submit") {
-                                print("Clicking Submit Button")
+                                print("Clicking Submit Button \n")
                                 if keyword.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                     keywordWarning = true
                                 } else {
@@ -102,20 +117,20 @@ struct ContentView: View {
                                     performSearch()
                                 }
                             }
-
+                            
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.blue)
                             .foregroundColor(.white)
                             .cornerRadius(10)
                             .buttonStyle(BorderlessButtonStyle())
-
-
+                            
+                            
                             
                             Spacer()
                             
                             Button("Clear") {
-                                print("Clicking Clear Button")
+                                print("Clicking Clear Button \n")
                                 keyword = ""
                                 selectedCategory = "All"
                                 conditionNew = false
@@ -127,6 +142,7 @@ struct ContentView: View {
                                 customLocation = false
                                 zipCode = ""
                                 keywordWarning = false
+                                showingResults = false
                             }
                             .frame(maxWidth: .infinity)
                             .padding()
@@ -134,8 +150,8 @@ struct ContentView: View {
                             .foregroundColor(.white)
                             .cornerRadius(10)
                             .buttonStyle(BorderlessButtonStyle())
-
-
+                            
+                            
                             
                             Spacer()
                         }
@@ -143,7 +159,7 @@ struct ContentView: View {
                 }
                 .navigationBarTitle("Product Search")
             }
-
+            
             if keywordWarning {
                 VStack {
                     Spacer() // Pushes the warning view to the bottom
@@ -152,6 +168,12 @@ struct ContentView: View {
                 }
                 .edgesIgnoringSafeArea(.bottom)
             }
+            
+        }
+    }
+    
+    var resultsList: some View{
+        Group{
             if showingResults {
                 List(searchResults, id: \.itemId) { result in
                     HStack {
@@ -173,7 +195,7 @@ struct ContentView: View {
                                 .frame(width: 50, height: 50)
                                 .cornerRadius(8)
                         }
-
+                        
                         VStack(alignment: .leading) {
                             Text(result.title ?? "Unknown Title")
                             Text("Price: \(result.price ?? "N/A")")
@@ -182,11 +204,13 @@ struct ContentView: View {
                         }
                     }
                 }
+            } else {
+                EmptyView()
             }
-
         }
-
     }
+
+    
     
     func performSearch() {
         guard let url = URL(string: "http://localhost:8080/search") else { return }
@@ -224,6 +248,7 @@ struct ContentView: View {
                 if let data = data {
                     do {
                         let results = try JSONDecoder().decode([SearchResult].self, from: data)
+                        print("Sample Search Result: \(results[0]) \n")
                         DispatchQueue.main.async {
                             self.searchResults = results
                             self.showingResults = true
