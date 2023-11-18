@@ -170,7 +170,10 @@ struct ContentView: View {
     }
     
     var resultsList: some View{
-        Section(header: Text("Results").font(.system(size:28, weight: .bold))){
+        Section(header: Text("Results")
+            .font(.system(size:28, weight: .bold))
+            .padding(.top, 5)
+            .padding(.bottom, 5)){
             List(searchResults, id: \.itemId) { result in
                 HStack {
                     // Displaying the image from the URL
@@ -192,7 +195,7 @@ struct ContentView: View {
                             .cornerRadius(8)
                     }
                     
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(result.title ?? "Unknown Title")
                             .lineLimit(1)
                             .truncationMode(.tail)
