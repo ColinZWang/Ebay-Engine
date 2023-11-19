@@ -229,9 +229,39 @@ struct ContentView: View {
         }
     }
 
-    
-    
     func performSearch() {
+        // Check if custom location is enabled
+        if !customLocation {
+            fetchUserZipCode { zipCode in
+                self.zipCode = zipCode
+                print("Fetched Zipcode for User: \(self.zipCode) \n")
+                self.executeSearch()
+            }
+        } else {
+            executeSearch()
+        }
+    }
+
+    func fetchUserZipCode(completion: @escaping (String) -> Void) {
+        let locationURL = URL(string: "http://localhost:8080/getUserLocation")!
+
+        URLSession.shared.dataTask(with: locationURL) { data, response, error in
+            guard let data = data, error == nil else {
+                print("Error fetching user location: \(error?.localizedDescription ?? "Unknown error")")
+                return
+            }
+
+            if let zipCode = String(data: data, encoding: .utf8) {
+                DispatchQueue.main.async {
+                    completion(zipCode)
+                }
+            }
+        }.resume()
+    }
+
+
+    
+    func executeSearch() {
         guard let url = URL(string: "http://localhost:8080/search") else { return }
         
         var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
@@ -250,10 +280,9 @@ struct ContentView: View {
             // Adding distance
             if !distance.isEmpty { queryItems.append(URLQueryItem(name: "distance", value: distance)) }
 
-            // Adding custom location zip code
-        if customLocation && !zipCode.isEmpty { queryItems.append(URLQueryItem(name: "zipcode", value: zipCode)) }else{
-            queryItems.append(URLQueryItem(name: "zipcode", value: "90001")) // Will implement user location later
-        }
+            // Adding location zip code
+            queryItems.append(URLQueryItem(name: "zipcode", value: zipCode))
+        
 
         components?.queryItems = queryItems
         
