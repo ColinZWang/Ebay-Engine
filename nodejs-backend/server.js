@@ -130,18 +130,24 @@ app.get('/search', (req, res) => {
   filterIndex++;
 
   let conditionValueIndex = 0;
-  if (params.newCondition|| params.usedCondition || params.unspecifiedCondition){
+  if (params.newCondition || params.usedCondition || params.unspecifiedCondition){
     ebayURL.searchParams.set(`itemFilter(${filterIndex}).name`, 'Condition');
+
+    if (params.newCondition) {
+        ebayURL.searchParams.set(`itemFilter(${filterIndex}).value(${conditionValueIndex++})`, '1000'); // New
+    }
+    if (params.usedCondition) {
+        ebayURL.searchParams.set(`itemFilter(${filterIndex}).value(${conditionValueIndex++})`, '3000'); // Used
+        ebayURL.searchParams.set(`itemFilter(${filterIndex}).value(${conditionValueIndex++})`, '4000');
+        ebayURL.searchParams.set(`itemFilter(${filterIndex}).value(${conditionValueIndex++})`, '5000');
+        ebayURL.searchParams.set(`itemFilter(${filterIndex}).value(${conditionValueIndex++})`, '6000');
+
+    }
+    if (params.unspecifiedCondition) {
+      ebayURL.searchParams.set(`itemFilter(${filterIndex}).value(${conditionValueIndex++})`, 'Unspecified');
+    }
   }
-  if (params.newCondition) {
-    ebayURL.searchParams.set(`itemFilter(${filterIndex}).value(${conditionValueIndex++})`, 'New');
-  }
-  if (params.usedCondition) {
-    ebayURL.searchParams.set(`itemFilter(${filterIndex}).value(${conditionValueIndex++})`, 'Used');
-  }
-  if (params.unspecifiedCondition) {
-    ebayURL.searchParams.set(`itemFilter(${filterIndex}).value(${conditionValueIndex++})`, 'Unspecified');
-  }
+  
 
   ebayURL.searchParams.set('outputSelector(0)', 'SellerInfo');
   ebayURL.searchParams.set('outputSelector(1)', 'StoreInfo');
@@ -156,6 +162,18 @@ app.get('/search', (req, res) => {
 
         // Extracting the required values from the response
         const extractedResults = searchResultItems.map((item, index) => {
+          let condition = 'NA';
+                const conditionId = item.condition && item.condition[0].conditionId && item.condition[0].conditionId[0];
+                switch(conditionId) {
+                    case '1000': condition = 'NEW'; break;
+                    case '2000':
+                    case '2500': condition = 'REFURBISHED'; break;
+                    case '3000':
+                    case '4000':
+                    case '5000':
+                    case '6000': condition = 'USED'; break;
+                    default: condition = 'NA';
+                }
             return {
                 index: index + 1,
                 itemId: item.itemId && item.itemId[0],
@@ -164,11 +182,12 @@ app.get('/search', (req, res) => {
                 price: item.sellingStatus && item.sellingStatus[0].currentPrice && item.sellingStatus[0].currentPrice[0].__value__,
                 shipping: (item.shippingInfo && item.shippingInfo[0].shippingServiceCost && parseFloat(item.shippingInfo[0].shippingServiceCost[0].__value__) === 0.0) ? "Free Shipping" : 
                           (item.shippingInfo && item.shippingInfo[0].shippingServiceCost ? `$${item.shippingInfo[0].shippingServiceCost[0].__value__}` : "N/A"),
-                zip: item.postalCode && item.postalCode[0]
+                zip: item.postalCode && item.postalCode[0],
+                condition: condition
             };
         });
 
-        console.log(extractedResults[0]); 
+        console.log("First Result: ",extractedResults[0]); 
         res.json(extractedResults);
     })
     .catch(error => {

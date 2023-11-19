@@ -174,57 +174,63 @@ struct ContentView: View {
             .font(.system(size:28, weight: .bold))
             .padding(.top, 5)
             .padding(.bottom, 5)){
-            List(searchResults, id: \.itemId) { result in
-                HStack {
-                    // Displaying the image from the URL
-                    if let imageUrlString = result.image, let imageUrl = URL(string: imageUrlString) {
-                        AsyncImage(url: imageUrl) { phase in
-                            if let image = phase.image {
-                                image.resizable().aspectRatio(contentMode: .fit)
-                            } else if phase.error != nil {
-                                Color.red // Error placeholder
-                            } else {
-                                Color.blue // Loading placeholder
+            if searchResults.isEmpty {
+                Text("No results found.")
+                    .foregroundColor(.red)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                List(searchResults, id: \.itemId) { result in
+                    HStack {
+                        // Displaying the image from the URL
+                        if let imageUrlString = result.image, let imageUrl = URL(string: imageUrlString) {
+                            AsyncImage(url: imageUrl) { phase in
+                                if let image = phase.image {
+                                    image.resizable().aspectRatio(contentMode: .fit)
+                                } else if phase.error != nil {
+                                    Color.red // Error placeholder
+                                } else {
+                                    Color.blue // Loading placeholder
+                                }
                             }
-                        }
-                        .frame(width: 50, height: 50)
-                        .cornerRadius(8)
-                    } else {
-                        Color.gray // Placeholder for missing image
                             .frame(width: 50, height: 50)
                             .cornerRadius(8)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(result.title ?? "Unknown Title")
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                        if let price = result.price {
-                            Text("$\(price)")
-                                .foregroundColor(.blue)
-                                .fontWeight(.bold)
                         } else {
-                            Text("N/A")
-                                .foregroundColor(.blue)
+                            Color.gray // Placeholder for missing image
+                                .frame(width: 50, height: 50)
+                                .cornerRadius(8)
                         }
-                        Text(result.shipping ?? "N/A")
-                            .foregroundColor(.gray)
-                        Text(result.zip ?? "N/A")
-                            .foregroundColor(.gray)
-                    }
-                    Spacer()
-                    VStack{
-                        Spacer()
-                        HStack{
-                            Image(systemName: "heart")
-                                .foregroundColor(.red)
-                            Image(systemName: "chevron.right")
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(result.title ?? "Unknown Title")
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                            if let price = result.price {
+                                Text("$\(price)")
+                                    .foregroundColor(.blue)
+                                    .fontWeight(.bold)
+                            } else {
+                                Text("N/A")
+                                    .foregroundColor(.blue)
+                            }
+                            Text(result.shipping ?? "N/A")
+                                .foregroundColor(.gray)
+                            Text(result.zip ?? "N/A")
+                                .foregroundColor(.gray)
                         }
                         Spacer()
-                        Text(result.condition ?? "N/A")
-                            .foregroundColor(.gray)
+                        VStack{
+                            Spacer()
+                            HStack{
+                                Image(systemName: "heart")
+                                    .foregroundColor(.red)
+                                Image(systemName: "chevron.right")
+                            }
+                            Spacer()
+                            Text(result.condition ?? "N/A")
+                                .foregroundColor(.gray)
+                            }
+                        }
                     }
-}
             }
         }
     }
@@ -270,18 +276,18 @@ struct ContentView: View {
         queryItems.append(URLQueryItem(name: "keyword", value: keyword))
         queryItems.append(URLQueryItem(name: "category", value: selectedCategory))
         if conditionUsed { queryItems.append(URLQueryItem(name: "usedCondition", value: "true")) }
-            if conditionNew { queryItems.append(URLQueryItem(name: "newCondition", value: "true")) }
-            if conditionUnspecified { queryItems.append(URLQueryItem(name: "unspecifiedCondition", value: "true")) }
+        if conditionNew { queryItems.append(URLQueryItem(name: "newCondition", value: "true")) }
+        if conditionUnspecified { queryItems.append(URLQueryItem(name: "unspecifiedCondition", value: "true")) }
 
-            // Adding shipping filters
-            if pickup { queryItems.append(URLQueryItem(name: "localpickup", value: "true")) }
-            if freeShipping { queryItems.append(URLQueryItem(name: "freeshipping", value: "true")) }
+        // Adding shipping filters
+        if pickup { queryItems.append(URLQueryItem(name: "localpickup", value: "true")) }
+        if freeShipping { queryItems.append(URLQueryItem(name: "freeshipping", value: "true")) }
 
-            // Adding distance
-            if !distance.isEmpty { queryItems.append(URLQueryItem(name: "distance", value: distance)) }
+        // Adding distance
+        if !distance.isEmpty { queryItems.append(URLQueryItem(name: "distance", value: distance)) }
 
-            // Adding location zip code
-            queryItems.append(URLQueryItem(name: "zipcode", value: zipCode))
+        // Adding location zip code
+        queryItems.append(URLQueryItem(name: "zipcode", value: zipCode))
         
 
         components?.queryItems = queryItems
@@ -293,16 +299,26 @@ struct ContentView: View {
                     print("Error making request: \(error)")
                     return
                 }
+
                 if let data = data {
-                    do {
-                        let results = try JSONDecoder().decode([SearchResult].self, from: data)
-                        print("Sample Search Result: \(results[0]) \n")
+                    let responseString = String(decoding: data, as: UTF8.self)
+                    if responseString == "undefined" {
+                        print("No Results From Search /n")
                         DispatchQueue.main.async {
-                            self.searchResults = results
-                            self.showingResults = true
+                            self.searchResults = []
+                            self.showingResults = false
                         }
-                    } catch {
-                        print("JSON Decoding Error: \(error)")
+                    } else {
+                        do {
+                            let results = try JSONDecoder().decode([SearchResult].self, from: data)
+                            DispatchQueue.main.async {
+                                self.searchResults = results
+                                self.showingResults = !results.isEmpty
+                                print("Sample Search Result \(results[0])")
+                            }
+                        } catch {
+                            print("JSON Decoding Error: \(error)")
+                        }
                     }
                 }
             }.resume()
