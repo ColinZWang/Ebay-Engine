@@ -187,6 +187,11 @@ app.get('/search', (req, res) => {
             };
         });
 
+        if (!extractedResults || extractedResults.length === 0) {
+          console.log("No Results Found, Sending Back Empty Array")
+          return res.json([]); // Send an empty array if no results
+        }
+
         console.log("First Result: ",extractedResults[0]); 
         res.json(extractedResults);
     })

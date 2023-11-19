@@ -300,28 +300,25 @@ struct ContentView: View {
                     return
                 }
 
-                if let data = data {
-                    let responseString = String(decoding: data, as: UTF8.self)
-                    if responseString == "undefined" {
-                        print("No Results From Search /n")
-                        DispatchQueue.main.async {
-                            self.searchResults = []
-                            self.showingResults = false
-                        }
+            if let data = data {
+                do {
+                    let results = try JSONDecoder().decode([SearchResult].self, from: data)
+                    if results.isEmpty{
+                        self.searchResults = []
+                        self.showingResults = true
+                        print("No Results Found for this Search \n")
                     } else {
-                        do {
-                            let results = try JSONDecoder().decode([SearchResult].self, from: data)
-                            DispatchQueue.main.async {
-                                self.searchResults = results
-                                self.showingResults = !results.isEmpty
-                                print("Sample Search Result \(results[0])")
-                            }
-                        } catch {
-                            print("JSON Decoding Error: \(error)")
+                        DispatchQueue.main.async {
+                            self.searchResults = results
+                            self.showingResults = true
+                            print("Sample Search Result: \(results[0]) \n")
                         }
                     }
+                } catch {
+                    print("JSON Decoding Error: \(error)")
                 }
-            }.resume()
+            }
+        }.resume()
     }
 }
 
