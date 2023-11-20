@@ -219,7 +219,7 @@ app.get('/wishlist', async (req, res) => {
 
   try {
     const items = await WishListItem.find({});
-    console.log("Fetched wishlist items:", items);
+    // console.log("Fetched wishlist items:", items);
     res.status(200).send(items);
   } catch (err) {
     console.error("Error fetching wishlist items:", err);
@@ -266,8 +266,6 @@ app.get('/product/:itemId', async (req, res) => {
   // Use the constructed URL and headers for your API call
   try {
     const response = await axios.get(ebayURL.toString(), { headers: headers });
-    console.log('Received response from eBay API:', response.data);
-
     // Extract required details from the eBay API response
     const item = response.data.Item;  // Assuming the response object has an 'Item' attribute
     const productDetails = {

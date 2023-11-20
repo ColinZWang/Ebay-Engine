@@ -180,57 +180,60 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 List(searchResults, id: \.itemId) { result in
-                    HStack {
-                        // Displaying the image from the URL
-                        if let imageUrlString = result.image, let imageUrl = URL(string: imageUrlString) {
-                            AsyncImage(url: imageUrl) { phase in
-                                if let image = phase.image {
-                                    image.resizable().aspectRatio(contentMode: .fit)
-                                } else if phase.error != nil {
-                                    Color.red // Error placeholder
-                                } else {
-                                    Color.blue // Loading placeholder
+                    NavigationLink(destination: ItemDetailView(itemId: result.itemId)) {
+                        
+                        HStack {
+                            // Displaying the image from the URL
+                            if let imageUrlString = result.image, let imageUrl = URL(string: imageUrlString) {
+                                AsyncImage(url: imageUrl) { phase in
+                                    if let image = phase.image {
+                                        image.resizable().aspectRatio(contentMode: .fit)
+                                    } else if phase.error != nil {
+                                        Color.red // Error placeholder
+                                    } else {
+                                        Color.blue // Loading placeholder
+                                    }
                                 }
-                            }
-                            .frame(width: 50, height: 50)
-                            .cornerRadius(8)
-                        } else {
-                            Color.gray // Placeholder for missing image
                                 .frame(width: 50, height: 50)
                                 .cornerRadius(8)
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(result.title ?? "Unknown Title")
-                                .lineLimit(1)
-                                .truncationMode(.tail)
-                            if let price = result.price {
-                                Text("$\(price)")
-                                    .foregroundColor(.blue)
-                                    .fontWeight(.bold)
                             } else {
-                                Text("N/A")
-                                    .foregroundColor(.blue)
+                                Color.gray // Placeholder for missing image
+                                    .frame(width: 50, height: 50)
+                                    .cornerRadius(8)
                             }
-                            Text(result.shipping ?? "N/A")
-                                .foregroundColor(.gray)
-                            Text(result.zip ?? "N/A")
-                                .foregroundColor(.gray)
-                        }
-                        Spacer()
-                        VStack{
-                            Spacer()
-                            HStack{
-                                Image(systemName: "heart")
-                                    .foregroundColor(.red)
-                                Image(systemName: "chevron.right")
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(result.title ?? "Unknown Title")
+                                    .lineLimit(1)
+                                    .truncationMode(.tail)
+                                if let price = result.price {
+                                    Text("$\(price)")
+                                        .foregroundColor(.blue)
+                                        .fontWeight(.bold)
+                                } else {
+                                    Text("N/A")
+                                        .foregroundColor(.blue)
+                                }
+                                Text(result.shipping ?? "N/A")
+                                    .foregroundColor(.gray)
+                                Text(result.zip ?? "N/A")
+                                    .foregroundColor(.gray)
                             }
                             Spacer()
-                            Text(result.condition ?? "N/A")
-                                .foregroundColor(.gray)
+                            VStack{
+                                Spacer()
+                                HStack{
+                                    Image(systemName: "heart")
+                                        .foregroundColor(.red)
+                                    Image(systemName: "chevron.right")
+                                }
+                                Spacer()
+                                Text(result.condition ?? "N/A")
+                                    .foregroundColor(.gray)
                             }
                         }
                     }
+                }
             }
         }
     }
@@ -359,6 +362,111 @@ struct SearchResult: Identifiable, Decodable {
     // Any other fields you want to include, set them as optional
 }
 
+struct ProductDetails: Codable {
+    let Title: String
+    let ProductImages: [String]
+    let Price: Double
+    let Location: String
+    let ItemSpecifics: [ItemSpecific]
+    let ReturnPolicy: ReturnPolicy
+    let handlingTime: Int
+    let shippingServiceCost: Double?
+    let shipToLocations: [String]
+    let expeditedShipping: Bool?
+    let oneDayShippingAvailable: Bool?
+    let FeedbackScore: Int
+    let PositiveFeedbackPercent: Double
+    let FeedbackRatingStar: String
+    let TopRatedSeller: Bool?
+    let StoreName: String?
+    let StoreURL: String?
+    
+    struct ItemSpecific: Codable {
+        let Name: String
+        let Value: [String]
+    }
+
+    struct ReturnPolicy: Codable {
+        let ReturnsAccepted: String?
+        let ReturnsWithin: String?
+    }
+}
+
+
+
+// Detailed view that fetches and shows the product details
+struct ItemDetailView: View {
+    let itemId: String
+    @State private var productDetails: ProductDetails?
+    @State private var isLoading = false
+
+    var body: some View {
+        VStack {
+            if isLoading {
+                Text("Loading...")
+            } else if let details = productDetails {
+                if let imageURLString = details.ProductImages.first, let url = URL(string: imageURLString) {
+                    AsyncImage(url: url) { phase in
+                        if let image = phase.image {
+                            image.resizable().aspectRatio(contentMode: .fit)
+                        } else if phase.error != nil {
+                            Text("Error loading image")
+                        } else {
+                            ProgressView()
+                        }
+                    }
+                    .frame(width: 200, height: 200)
+                }
+                Text(details.Title)
+                    .font(.headline)
+                Text("$\(details.Price, specifier: "%.2f")")
+                    .font(.subheadline)
+                // Assuming `ItemSpecifics` is a dictionary
+                ForEach(details.ItemSpecifics, id: \.Name) { item in
+                    Text("\(item.Name): \(item.Value.joined(separator: ", "))")
+                }
+            } else {
+                Text("No details available")
+            }
+        }
+        .onAppear {
+            loadItemDetails()
+        }
+    }
+    
+    func loadItemDetails() {
+        isLoading = true
+        let url = URL(string: "http://localhost:8080/product/\(itemId)")!
+
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    isLoading = false
+                    print("No data received")
+                }
+                return
+            }
+
+            print("Item Details Data Received")
+            let decoder = JSONDecoder()
+
+            do {
+                let details = try decoder.decode(ProductDetails.self, from: data)
+                DispatchQueue.main.async {
+                    self.productDetails = details
+                    isLoading = false
+                    print("Product Details: \(details)")
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    isLoading = false
+                    print("Decoding error: \(error.localizedDescription)")
+                    // Handle decoding error
+                }
+            }
+        }.resume()
+    }
+}
 
 #Preview {
     ContentView()
