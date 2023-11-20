@@ -284,7 +284,9 @@ struct ContentView: View {
         if freeShipping { queryItems.append(URLQueryItem(name: "freeshipping", value: "true")) }
 
         // Adding distance
-        if !distance.isEmpty { queryItems.append(URLQueryItem(name: "distance", value: distance)) }
+        if !distance.isEmpty { queryItems.append(URLQueryItem(name: "distance", value: distance)) } else {
+            queryItems.append(URLQueryItem(name: "distance", value: "10"))
+        }
 
         // Adding location zip code
         queryItems.append(URLQueryItem(name: "zipcode", value: zipCode))
