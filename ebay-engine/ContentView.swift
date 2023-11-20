@@ -359,7 +359,6 @@ struct SearchResult: Identifiable, Decodable {
     let shipping: String?
     let zip: String?
     let condition: String?
-    // Any other fields you want to include, set them as optional
 }
 
 struct ProductDetails: Codable {
@@ -405,18 +404,23 @@ struct ItemDetailView: View {
             if isLoading {
                 Text("Loading...")
             } else if let details = productDetails {
-                if let imageURLString = details.ProductImages.first, let url = URL(string: imageURLString) {
-                    AsyncImage(url: url) { phase in
-                        if let image = phase.image {
-                            image.resizable().aspectRatio(contentMode: .fit)
-                        } else if phase.error != nil {
-                            Text("Error loading image")
-                        } else {
-                            ProgressView()
+                TabView {
+                    ForEach(details.ProductImages, id: \.self) { imageUrl in
+                        if let url = URL(string: imageUrl) {
+                            AsyncImage(url: url) { phase in
+                                if let image = phase.image {
+                                    image.resizable().aspectRatio(contentMode: .fit)
+                                } else if phase.error != nil {
+                                    Text("Error loading image")
+                                } else {
+                                    ProgressView()
+                                }
+                            }
                         }
                     }
-                    .frame(width: 200, height: 200)
                 }
+                .tabViewStyle(PageTabViewStyle())
+                .frame(height: 200)
                 Text(details.Title)
                     .font(.headline)
                 Text("$\(details.Price, specifier: "%.2f")")
@@ -447,7 +451,7 @@ struct ItemDetailView: View {
                 return
             }
 
-            print("Item Details Data Received")
+            print("Item Details Data Received \n")
             let decoder = JSONDecoder()
 
             do {
@@ -455,7 +459,7 @@ struct ItemDetailView: View {
                 DispatchQueue.main.async {
                     self.productDetails = details
                     isLoading = false
-                    print("Product Details: \(details)")
+                    print("Product Details: \(details) \n")
                 }
             } catch {
                 DispatchQueue.main.async {
