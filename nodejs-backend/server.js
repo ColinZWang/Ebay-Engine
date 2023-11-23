@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 8080;
 
 // eBay credentials
 const EBAY_API_ENDPOINT = 'https://svcs.ebay.com/services/search/FindingService/v1';
-const EBAY_API_KEY = 'ZixiWang-dummy-PRD-5fc9571dc-e3815a24';
+const EBAY_API_KEY = 'ZixiWang-dummy2-PRD-ef4b751c9-2b501754';
 
 // Update your Google API Key and Search Engine ID
 const API_KEY = 'AIzaSyBungfBhRx7EXYEAFdyzygNAQwD9UZ14ZY';
@@ -16,8 +16,8 @@ const SEARCH_ENGINE_ID = '33aff5545c7c147d6';
 const OAuthToken = require('./ebay_oauth_token.js');
 
 // Initialize with your client id and client secret
-CLIENT_ID = 'ZixiWang-dummy-PRD-5fc9571dc-e3815a24'
-CLIENT_SECRET = 'PRD-fc9571dc2408-8084-440a-b12d-c1e9'
+CLIENT_ID = 'ZixiWang-dummy2-PRD-ef4b751c9-2b501754'
+CLIENT_SECRET = 'PRD-f4b751c9bfe9-0c48-40d9-87bd-81ee'
 const oauth = new OAuthToken(CLIENT_ID, CLIENT_SECRET);
 
 // Fetch and store the token in memory

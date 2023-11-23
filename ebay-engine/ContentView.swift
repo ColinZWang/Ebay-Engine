@@ -421,6 +421,7 @@ struct ItemDetailView: View {
                 }
                 .tabViewStyle(PageTabViewStyle())
                 .frame(height: 200)
+                
                 Text(details.Title)
                     .font(.headline)
                 Text("$\(details.Price, specifier: "%.2f")")
