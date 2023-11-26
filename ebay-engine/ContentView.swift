@@ -403,67 +403,93 @@ struct ItemDetailView: View {
     private let gridItems = [GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
-        ScrollView{
-            VStack {
-                if isLoading {
-                    Text("Loading...")
-                } else if let details = productDetails {
-                    TabView {
-                        ForEach(details.ProductImages, id: \.self) { imageUrl in
-                            if let url = URL(string: imageUrl) {
-                                AsyncImage(url: url) { phase in
-                                    if let image = phase.image {
-                                        image.resizable().aspectRatio(contentMode: .fit)
-                                    } else if phase.error != nil {
-                                        Text("Error loading image")
-                                    } else {
-                                        ProgressView()
+        
+        TabView{
+            
+            // Info Tab
+            ScrollView{
+                VStack {
+                    if isLoading {
+                        Text("Loading...")
+                    } else if let details = productDetails {
+                        TabView {
+                            ForEach(details.ProductImages, id: \.self) { imageUrl in
+                                if let url = URL(string: imageUrl) {
+                                    AsyncImage(url: url) { phase in
+                                        if let image = phase.image {
+                                            image.resizable().aspectRatio(contentMode: .fit)
+                                        } else if phase.error != nil {
+                                            Text("Error loading image")
+                                        } else {
+                                            ProgressView()
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                    .tabViewStyle(PageTabViewStyle())
-                    .frame(height: 200)
-                    
-                    Text(details.Title)
-                        .font(.headline)
-                    Text("$\(details.Price, specifier: "%.2f")")
-                        .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
-                        .font(.headline)
-                        .foregroundColor(.blue)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal)
-                        .padding(.top, 10)
-
-                    
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(.black)
-                        Text("Description")
-                    }
-                    .font(.headline)
-                    .frame(maxWidth: .infinity, alignment:.leading)
-                    .padding(.horizontal)
-                    .padding(.vertical)
-
+                        .tabViewStyle(PageTabViewStyle())
+                        .frame(height: 200)
                         
-                    // Item specifics table
-                    ForEach(details.ItemSpecifics, id: \.Name) { item in
+                        Text(details.Title)
+                            .font(.headline)
+                        Text("$\(details.Price, specifier: "%.2f")")
+                            .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                            .font(.headline)
+                            .foregroundColor(.blue)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal)
+                            .padding(.top, 10)
+                        
+                        
                         HStack {
-                            Text(item.Name + ":")
-                                .fontWeight(.bold)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                            Text(item.Value.joined(separator: ", "))
-                                .frame(maxWidth: .infinity, alignment: .leading)
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(.black)
+                            Text("Description")
                         }
-                        Divider() // Horizontal divider after each item
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, alignment:.leading)
+                        .padding(.horizontal)
+                        .padding(.vertical)
+                        
+                        
+                        // Item specifics table
+                        ForEach(details.ItemSpecifics, id: \.Name) { item in
+                            HStack {
+                                Text(item.Name + ":")
+                                    .fontWeight(.bold)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                Text(item.Value.joined(separator: ", "))
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            Divider() // Horizontal divider after each item
+                        }
+                        .padding(.horizontal)
+                    } else {
+                        Text("No details available")
                     }
-                    .padding(.horizontal)
-                } else {
-                    Text("No details available")
                 }
             }
+            .tabItem{
+                Label("Info", systemImage: "info.circle")
+            }
+            
+            // Shipping Tab
+            Text("Shipping Info Placeholder")
+                .tabItem {
+                    Label("Shipping", systemImage: "shippingbox")
+                }
+
+            // Photos Tab
+            Text("Photos Placeholder")
+                .tabItem {
+                    Label("Photos", systemImage: "photo")
+                }
+
+            // Similar Tab
+            Text("Similar Items Placeholder")
+                .tabItem {
+                    Label("Similar", systemImage: "rectangle.on.rectangle")
+                }
         }
         .onAppear {
             loadItemDetails()
