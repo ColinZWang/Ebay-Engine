@@ -432,21 +432,19 @@ struct ItemDetailView: View {
                         
                         Text(details.Title)
                             .font(.headline)
+                            .padding(.vertical)
+                        
                         Text("$\(details.Price, specifier: "%.2f")")
                             .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
-                            .font(.headline)
                             .foregroundColor(.blue)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal)
-                            .padding(.top, 10)
-                        
                         
                         HStack {
                             Image(systemName: "magnifyingglass")
                                 .foregroundColor(.black)
                             Text("Description")
                         }
-                        .font(.headline)
                         .frame(maxWidth: .infinity, alignment:.leading)
                         .padding(.horizontal)
                         .padding(.vertical)
@@ -454,14 +452,15 @@ struct ItemDetailView: View {
                         
                         // Item specifics table
                         ForEach(details.ItemSpecifics, id: \.Name) { item in
-                            HStack {
-                                Text(item.Name + ":")
-                                    .fontWeight(.bold)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                Text(item.Value.joined(separator: ", "))
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            VStack(spacing: 2){
+                                HStack {
+                                    Text(item.Name + ":")
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                    Text(item.Value.joined(separator: ", "))
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                                Divider() // Horizontal divider after each item
                             }
-                            Divider() // Horizontal divider after each item
                         }
                         .padding(.horizontal)
                     } else {
