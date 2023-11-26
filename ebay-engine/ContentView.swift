@@ -123,7 +123,7 @@ struct ContentView: View {
                             showingResults = false
                         } else {
                             keywordWarning = false
-                            print("Performing Search")
+                            print("Performing Search for: \(keyword)")
                             performSearch()
                         }
                     }
