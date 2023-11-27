@@ -473,10 +473,17 @@ struct ItemDetailView: View {
             }
             
             // Shipping Tab
-            Text("Shipping Info Placeholder")
-                .tabItem {
-                    Label("Shipping", systemImage: "shippingbox")
-                }
+            if let details = productDetails {
+                ShippingInfoView(productDetails: details)
+                    .tabItem {
+                        Label("Shipping", systemImage: "shippingbox")
+                    }
+            } else {
+                Text("Loading Shipping Info...")
+                    .tabItem {
+                        Label("Shipping", systemImage: "shippingbox")
+                    }
+            }
 
             // Photos Tab
             Text("Photos Placeholder")
@@ -528,6 +535,96 @@ struct ItemDetailView: View {
         }.resume()
     }
 }
+
+// Inside your ItemDetailView
+
+// Section for Shipping Info
+struct ShippingInfoView: View {
+    var productDetails: ProductDetails
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            
+            Divider()
+            
+            SectionHeaderView(title: "Seller", systemImage: "storefront")
+            
+            Divider()
+            
+            InfoRow(label: "Store Name", value: productDetails.StoreName, link: productDetails.StoreURL)
+            InfoRow(label: "Feedback Score", value: String(productDetails.FeedbackScore))
+            InfoRow(label: "Popularity", value: "\(productDetails.PositiveFeedbackPercent)")
+            
+            Divider()
+            
+            SectionHeaderView(title: "Shipping Info", systemImage: "sailboat")
+            
+            Divider()
+
+//            InfoRow(label: "Shipping Cost", value: productDetails.shippingServiceCost == 0 ? "FREE" : "$\(productDetails.shippingServiceCost ?? 0, specifier: "%.2f")")
+//            InfoRow(label: "Global Shipping", value: productDetails.GlobalShipping ? "Yes" : "No")
+            InfoRow(label: "Handling Time", value: "\(productDetails.handlingTime) day(s)")
+            
+            Divider()
+            
+            SectionHeaderView(title: "Return Policy", systemImage: "return")
+            
+            Divider()
+
+            InfoRow(label: "Policy", value: productDetails.ReturnPolicy.ReturnsAccepted)
+//            InfoRow(label: "Refund Mode", value: productDetails.ReturnPolicy.RefundMode)
+            InfoRow(label: "Return Within", value: productDetails.ReturnPolicy.ReturnsWithin)
+//            InfoRow(label: "Shipping Cost Paid By", value: productDetails.ReturnPolicy.ShippingCostPaidBy)
+        }
+        .padding()
+    }
+}
+
+// Reusable view for section headers
+struct SectionHeaderView: View {
+    let title: String
+    let systemImage: String
+    
+    var body: some View {
+        HStack{
+            Image(systemName: systemImage)
+            Text(title)
+                .font(.headline)
+                .padding(.vertical, 5)
+        }
+    }
+}
+
+// Reusable view for info rows
+struct InfoRow: View {
+    let label: String
+    var value: String?
+    var link: String?
+    
+    var body: some View {
+        if value != nil || link != nil {
+            HStack {
+                Text(label)
+                    .frame(maxWidth: .infinity, alignment: .center)
+
+                Spacer()
+                if let link = link, let url = URL(string: link), UIApplication.shared.canOpenURL(url) {
+                    Link(value ?? "", destination: url)
+                        .frame(maxWidth: .infinity, alignment: .center)
+
+                } else {
+                    Text(value ?? "N/A")
+                        .frame(maxWidth: .infinity, alignment: .center)
+
+                }
+            }
+        }
+    }
+}
+
+
+
+
 
 #Preview {
     ContentView()
