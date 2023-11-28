@@ -709,12 +709,46 @@ struct WishlistView: View {
     @State private var isLoading = false
 
     var body: some View {
-        List(wishlistItems) { item in
-            HStack {
-                // Image loading logic here
-                Text(item.title)
-                Spacer()
-                Text(item.price)
+        List {
+            ForEach(wishlistItems, id: \.id) { item in
+                NavigationLink(destination: ItemDetailView(itemId: item.itemId, shippingCost: item.shipping)) {
+                    HStack {
+                        // Image loading logic here
+                        if let imageUrl = URL(string: item.image) {
+                            AsyncImage(url: imageUrl) { phase in
+                                if let image = phase.image {
+                                    image.resizable().aspectRatio(contentMode: .fit)
+                                } else if phase.error != nil {
+                                    Color.red // Error placeholder
+                                } else {
+                                    Color.blue // Loading placeholder
+                                }
+                            }
+                            .frame(width: 50, height: 50)
+                            .cornerRadius(8)
+                        } else {
+                            Color.gray // Placeholder for missing image
+                                .frame(width: 50, height: 50)
+                                .cornerRadius(8)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(item.title)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                            Text("$\(item.price)")
+                                .foregroundColor(.blue)
+                                .fontWeight(.bold)
+                            Text(item.shipping)
+                                .foregroundColor(.gray)
+                            Text(item.zip)
+                                .foregroundColor(.gray)
+                        }
+                        Spacer()
+                        Image(systemName: "heart.fill")
+                            .foregroundColor(.red)
+                    }
+                }
             }
         }
         .onAppear(perform: loadWishlist)
