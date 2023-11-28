@@ -180,7 +180,7 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 List(searchResults, id: \.itemId) { result in
-                    NavigationLink(destination: ItemDetailView(itemId: result.itemId)) {
+                    NavigationLink(destination: ItemDetailView(itemId: result.itemId, shippingCost: result.shipping ?? "N/A")) {
                         
                         HStack {
                             // Displaying the image from the URL
@@ -399,6 +399,7 @@ struct ProductDetails: Codable {
 // Detailed view that fetches and shows the product details
 struct ItemDetailView: View {
     let itemId: String
+    let shippingCost: String
     @State private var productDetails: ProductDetails?
     @State private var isLoading = false
     
@@ -477,7 +478,7 @@ struct ItemDetailView: View {
             
             // Shipping Tab
             if let details = productDetails {
-                ShippingInfoView(productDetails: details)
+                ShippingInfoView(productDetails: details, shippingCost: shippingCost)
                     .tabItem {
                         Label("Shipping", systemImage: "shippingbox")
                     }
@@ -543,6 +544,7 @@ struct ItemDetailView: View {
 // Section for Shipping Info
 struct ShippingInfoView: View {
     var productDetails: ProductDetails
+    var shippingCost: String
     
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
@@ -563,7 +565,7 @@ struct ShippingInfoView: View {
             
             Divider()
 
-//            InfoRow(label: "Shipping Cost", value: productDetails.shippingServiceCost == 0 ? "FREE" : "$\(productDetails.shippingServiceCost ?? 0, specifier: "%.2f")")
+            InfoRow(label: "Shipping Cost", value: shippingCost)
             InfoRow(label: "Global Shipping", value: productDetails.GlobalShipping ? "Yes" : "No")
             InfoRow(label: "Handling Time", value: "\(productDetails.handlingTime) day(s)")
             
