@@ -567,7 +567,7 @@ struct ShippingInfoView: View {
 
             InfoRow(label: "Shipping Cost", value: shippingCost)
             InfoRow(label: "Global Shipping", value: productDetails.GlobalShipping ? "Yes" : "No")
-            InfoRow(label: "Handling Time", value: "\(productDetails.handlingTime) day(s)")
+            InfoRow(label: "Handling Time", value: productDetails.handlingTime == 1 ? "\(productDetails.handlingTime) day" : "\(productDetails.handlingTime) days")
             
             Divider()
             
@@ -580,7 +580,7 @@ struct ShippingInfoView: View {
             InfoRow(label: "Return Within", value: productDetails.ReturnPolicy.ReturnsWithin)
             InfoRow(label: "Shipping Cost Paid By", value: productDetails.ReturnPolicy.ShippingCostPaidBy)
         }
-        .padding()
+        .padding(.top,0)
     }
 }
 
