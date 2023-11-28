@@ -276,7 +276,9 @@ app.get('/product/:itemId', async (req, res) => {
         ItemSpecifics: item.ItemSpecifics.NameValueList,
         ReturnPolicy: {
             ReturnsAccepted: item.ReturnPolicy?.ReturnsAccepted,
-            ReturnsWithin: item.ReturnPolicy?.ReturnsWithin
+            ReturnsWithin: item.ReturnPolicy?.ReturnsWithin,
+            Refund: item.ReturnPolicy?.Refund,
+            ShippingCostPaidBy: item.ReturnPolicy?.ShippingCostPaidBy
         },
         handlingTime: item.HandlingTime,
         shippingServiceCost: item.ShippingCostSummary?.ShippingServiceCost,
@@ -288,7 +290,8 @@ app.get('/product/:itemId', async (req, res) => {
         FeedbackRatingStar: item.Seller?.FeedbackRatingStar,
         TopRatedSeller: item.Seller?.TopRatedSeller,
         StoreName: item.Storefront?.StoreName,
-        StoreURL: item.Storefront?.StoreURL
+        StoreURL: item.Storefront?.StoreURL,
+        GlobalShipping: item.GlobalShipping
 
     };
 

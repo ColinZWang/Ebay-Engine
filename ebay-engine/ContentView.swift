@@ -379,6 +379,7 @@ struct ProductDetails: Codable {
     let TopRatedSeller: Bool?
     let StoreName: String?
     let StoreURL: String?
+    let GlobalShipping: Bool
     
     struct ItemSpecific: Codable {
         let Name: String
@@ -388,6 +389,8 @@ struct ProductDetails: Codable {
     struct ReturnPolicy: Codable {
         let ReturnsAccepted: String?
         let ReturnsWithin: String?
+        let Refund: String?
+        let ShippingCostPaidBy: String?
     }
 }
 
@@ -536,7 +539,6 @@ struct ItemDetailView: View {
     }
 }
 
-// Inside your ItemDetailView
 
 // Section for Shipping Info
 struct ShippingInfoView: View {
@@ -553,7 +555,7 @@ struct ShippingInfoView: View {
             
             InfoRow(label: "Store Name", value: productDetails.StoreName, link: productDetails.StoreURL)
             InfoRow(label: "Feedback Score", value: String(productDetails.FeedbackScore))
-            InfoRow(label: "Popularity", value: "\(productDetails.PositiveFeedbackPercent)")
+            InfoRow(label: "Popularity", value: String(productDetails.PositiveFeedbackPercent))
             
             Divider()
             
@@ -562,7 +564,7 @@ struct ShippingInfoView: View {
             Divider()
 
 //            InfoRow(label: "Shipping Cost", value: productDetails.shippingServiceCost == 0 ? "FREE" : "$\(productDetails.shippingServiceCost ?? 0, specifier: "%.2f")")
-//            InfoRow(label: "Global Shipping", value: productDetails.GlobalShipping ? "Yes" : "No")
+            InfoRow(label: "Global Shipping", value: productDetails.GlobalShipping ? "Yes" : "No")
             InfoRow(label: "Handling Time", value: "\(productDetails.handlingTime) day(s)")
             
             Divider()
@@ -572,9 +574,9 @@ struct ShippingInfoView: View {
             Divider()
 
             InfoRow(label: "Policy", value: productDetails.ReturnPolicy.ReturnsAccepted)
-//            InfoRow(label: "Refund Mode", value: productDetails.ReturnPolicy.RefundMode)
+            InfoRow(label: "Refund Mode", value: productDetails.ReturnPolicy.Refund)
             InfoRow(label: "Return Within", value: productDetails.ReturnPolicy.ReturnsWithin)
-//            InfoRow(label: "Shipping Cost Paid By", value: productDetails.ReturnPolicy.ShippingCostPaidBy)
+            InfoRow(label: "Shipping Cost Paid By", value: productDetails.ReturnPolicy.ShippingCostPaidBy)
         }
         .padding()
     }
