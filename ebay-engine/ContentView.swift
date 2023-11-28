@@ -38,6 +38,10 @@ struct ContentView: View {
                 }
             }
             .navigationBarTitle("Product Search")
+            .navigationBarItems(trailing: NavigationLink(destination: WishlistView(), label: {
+                Image(systemName: "heart.circle") // You can use a custom image or system icon
+                    .imageScale(.large)
+            }))
             .overlay(
                 keywordWarning ? WarningView().position(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height * 0.75) : nil
                     )
@@ -394,6 +398,19 @@ struct ProductDetails: Codable {
     }
 }
 
+struct WishlistItem: Identifiable, Decodable {
+    var id: String { _id }
+    let _id: String
+    let itemId: String
+    let image: String
+    let title: String
+    let price: String
+    let shipping: String
+    let zip: String
+    let __v: Int
+}
+
+
 
 
 // Detailed view that fetches and shows the product details
@@ -687,6 +704,56 @@ struct PhotosView: View {
 }
 
 
+struct WishlistView: View {
+    @State private var wishlistItems: [WishlistItem] = []
+    @State private var isLoading = false
+
+    var body: some View {
+        List(wishlistItems) { item in
+            HStack {
+                // Image loading logic here
+                Text(item.title)
+                Spacer()
+                Text(item.price)
+            }
+        }
+        .onAppear(perform: loadWishlist)
+        .navigationTitle("Favorites")
+    }
+
+    func loadWishlist() {
+        isLoading = true
+        print("Loading wishlist...")
+
+        // Replace with your server's actual URL
+        guard let url = URL(string: "http://localhost:8080/wishlist") else {
+            print("Invalid URL")
+            isLoading = false
+            return
+        }
+
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let data = data {
+                do {
+                    let decodedResponse = try JSONDecoder().decode([WishlistItem].self, from: data)
+                    DispatchQueue.main.async {
+                        self.wishlistItems = decodedResponse
+                        print("Decoded Response: \(decodedResponse)")
+                    }
+                } catch {
+                    print("Decoding error: \(error)")
+                }
+            } else if let error = error {
+                print("Error fetching wishlist: \(error.localizedDescription)")
+            }
+            DispatchQueue.main.async {
+                self.isLoading = false
+            }
+        }.resume()
+
+    }
+
+}
 
 
 

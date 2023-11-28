@@ -219,7 +219,7 @@ app.get('/wishlist', async (req, res) => {
 
   try {
     const items = await WishListItem.find({});
-    // console.log("Fetched wishlist items:", items);
+    console.log("Sample Wishlist Item:", items[0]);
     res.status(200).send(items);
   } catch (err) {
     console.error("Error fetching wishlist items:", err);
