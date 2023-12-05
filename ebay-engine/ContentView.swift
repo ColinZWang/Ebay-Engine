@@ -184,57 +184,61 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 List(searchResults, id: \.itemId) { result in
-                    NavigationLink(destination: ItemDetailView(itemId: result.itemId, shippingCost: result.shipping ?? "N/A")) {
-                        
-                        HStack {
-                            // Displaying the image from the URL
-                            if let imageUrlString = result.image, let imageUrl = URL(string: imageUrlString) {
-                                AsyncImage(url: imageUrl) { phase in
-                                    if let image = phase.image {
-                                        image.resizable().aspectRatio(contentMode: .fit)
-                                    } else if phase.error != nil {
-                                        Color.red // Error placeholder
-                                    } else {
-                                        Color.blue // Loading placeholder
+                    HStack{
+                        NavigationLink(destination: ItemDetailView(itemId: result.itemId, shippingCost: result.shipping ?? "N/A")) {
+                            
+                            HStack {
+                                // Displaying the image from the URL
+                                if let imageUrlString = result.image, let imageUrl = URL(string: imageUrlString) {
+                                    AsyncImage(url: imageUrl) { phase in
+                                        if let image = phase.image {
+                                            image.resizable().aspectRatio(contentMode: .fit)
+                                        } else if phase.error != nil {
+                                            Color.red // Error placeholder
+                                        } else {
+                                            Color.blue // Loading placeholder
+                                        }
                                     }
-                                }
-                                .frame(width: 50, height: 50)
-                                .cornerRadius(8)
-                            } else {
-                                Color.gray // Placeholder for missing image
                                     .frame(width: 50, height: 50)
                                     .cornerRadius(8)
-                            }
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(result.title ?? "Unknown Title")
-                                    .lineLimit(1)
-                                    .truncationMode(.tail)
-                                if let price = result.price {
-                                    Text("$\(price)")
-                                        .foregroundColor(.blue)
-                                        .fontWeight(.bold)
                                 } else {
-                                    Text("N/A")
-                                        .foregroundColor(.blue)
+                                    Color.gray // Placeholder for missing image
+                                        .frame(width: 50, height: 50)
+                                        .cornerRadius(8)
                                 }
-                                Text(result.shipping ?? "N/A")
-                                    .foregroundColor(.gray)
-                                Text(result.zip ?? "N/A")
-                                    .foregroundColor(.gray)
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(result.title ?? "Unknown Title")
+                                        .lineLimit(1)
+                                        .truncationMode(.tail)
+                                    if let price = result.price {
+                                        Text("$\(price)")
+                                            .foregroundColor(.blue)
+                                            .fontWeight(.bold)
+                                    } else {
+                                        Text("N/A")
+                                            .foregroundColor(.blue)
+                                    }
+                                    Text(result.shipping ?? "N/A")
+                                        .foregroundColor(.gray)
+                                    Text(result.zip ?? "N/A")
+                                        .foregroundColor(.gray)
+                                }
+                                Spacer()
+                                
                             }
+                        }
+                        VStack{
                             Spacer()
-                            VStack{
-                                Spacer()
-                                HStack{
-                                    Image(systemName: "heart")
-                                        .foregroundColor(.red)
-                                    Image(systemName: "chevron.right")
-                                }
-                                Spacer()
-                                Text(result.condition ?? "N/A")
-                                    .foregroundColor(.gray)
-                            }
+                            Button(action: {
+                                addToWishlist(item: result)
+                            }) {
+                                Image(systemName: "heart")
+                                    .foregroundColor(.red)
+                            }.buttonStyle(PlainButtonStyle())
+                            Spacer()
+                            Text(result.condition ?? "N/A")
+                                .foregroundColor(.gray)
                         }
                     }
                 }
@@ -326,6 +330,40 @@ struct ContentView: View {
                 } catch {
                     print("JSON Decoding Error: \(error)")
                 }
+            }
+        }.resume()
+    }
+    func addToWishlist(item: SearchResult) {
+        guard let url = URL(string: "http://localhost:8080/wishlist") else {
+            print("Invalid URL")
+            return
+        }
+
+        // Convert SearchResult to JSON
+        let json: [String: Any] = [
+            "itemId": item.itemId,
+            "image": item.image ?? "",
+            "title": item.title ?? "",
+            "price": item.price ?? "",
+            "shipping": item.shipping ?? "",
+            "zip": item.zip ?? ""
+        ]
+
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+
+        // Create a POST request
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = jsonData
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error making request: \(error)")
+                return
+            }
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                print("Item added to wishlist")
             }
         }.resume()
     }
