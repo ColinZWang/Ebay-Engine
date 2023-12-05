@@ -226,19 +226,19 @@ struct ContentView: View {
                                 }
                                 Spacer()
                                 
+                                VStack{
+                                    Spacer()
+                                    Button(action: {
+                                        addToWishlist(item: result)
+                                    }) {
+                                        Image(systemName: "heart")
+                                            .foregroundColor(.red)
+                                    }.buttonStyle(PlainButtonStyle())
+                                    Spacer()
+                                    Text(result.condition ?? "N/A")
+                                        .foregroundColor(.gray)
+                                }
                             }
-                        }
-                        VStack{
-                            Spacer()
-                            Button(action: {
-                                addToWishlist(item: result)
-                            }) {
-                                Image(systemName: "heart")
-                                    .foregroundColor(.red)
-                            }.buttonStyle(PlainButtonStyle())
-                            Spacer()
-                            Text(result.condition ?? "N/A")
-                                .foregroundColor(.gray)
                         }
                     }
                 }
