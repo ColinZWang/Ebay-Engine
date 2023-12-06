@@ -808,51 +808,81 @@ struct SimilarItemsView: View {
     let itemId: String
     @State private var similarItems: [SimilarItem] = []
     @State private var isLoading = false
+    @State private var selectedSortCriteria = "Default"
+    @State private var isAscending = true
 
+    private let sortCriteria = ["Default", "Name", "Price", "Days Left", "Shipping"]
+    
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 160))], spacing: 10) {
-                ForEach(similarItems) { item in
-                    VStack {
-                        AsyncImage(url: URL(string: item.imageURL)) { image in
-                            image.resizable()
-                        } placeholder: {
-                            Color.gray
-                        }
-                        .frame(width: 150, height: 150)
-                        .cornerRadius(10)
-
-                        Text(item.title)
-                            .font(.subheadline)
-                            .lineLimit(2)
-                            .multilineTextAlignment(.center)
-
-                        HStack {
-                            Text("Shipping: $\(item.shippingCost.doubleValue ?? 0.0)")
-                            Spacer()
-                            Text("Time left: \(item.timeLeft)")
-                        }
-                        .font(.caption)
-                        .padding(.horizontal)
-
-                        Text("$\(item.buyItNowPrice.doubleValue ?? 0.0, specifier: "%.2f")")                            .font(.headline)
-                            .foregroundColor(.blue)
-                    }
-                    .frame(width: 160)
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(15)
-                    .shadow(radius: 5)
+        VStack {
+            // Sort Criteria Picker
+            Picker("Sort By", selection: $selectedSortCriteria) {
+                ForEach(sortCriteria, id: \.self) {
+                    Text($0)
                 }
             }
-            .padding(.horizontal)
-        }
-        .onAppear(perform: loadSimilarItems)
-        .navigationTitle("Similar Items")
-        .overlay {
-            if isLoading {
-                ProgressView()
+            .pickerStyle(SegmentedPickerStyle())
+            .padding()
+
+            // Order Buttons
+            HStack {
+                Button("Ascending") {
+                    isAscending = true
+                }
+                .foregroundColor(isAscending ? .blue : .gray)
+
+                Button("Descending") {
+                    isAscending = false
+                }
+                .foregroundColor(isAscending ? .gray : .blue)
             }
+
+            // Displaying the items
+            ScrollView{
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 160))], spacing: 10) {
+                    ForEach(similarItems, id: \.id) { item in
+                        VStack {
+                            AsyncImage(url: URL(string: item.imageURL)) { image in
+                                image.resizable()
+                            } placeholder: {
+                                Color.gray
+                            }
+                            .frame(width: 150, height: 150)
+                            .cornerRadius(10)
+                            
+                            Text(item.title)
+                                .font(.subheadline)
+                                .lineLimit(2)
+                                .multilineTextAlignment(.center)
+                            
+                            HStack {
+                                Text("Shipping: $\(item.shippingCost.doubleValue ?? 0.0)")
+                                Spacer()
+                                Text("Time left: \(item.timeLeft)")
+                            }
+                            .font(.caption)
+                            .padding(.horizontal)
+                            
+                            Text("$\(item.buyItNowPrice.doubleValue ?? 0.0, specifier: "%.2f")")                            .font(.headline)
+                                .foregroundColor(.blue)
+                        }
+                        .frame(width: 160)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(15)
+                        .shadow(radius: 5)
+                    }
+                }
+                .onAppear(perform: loadSimilarItems)
+                .navigationTitle("Similar Items")
+            }
+        }
+        // Sorting the items based on the selected criteria and order
+        .onChange(of: selectedSortCriteria) { _ in
+            sortItems()
+        }
+        .onChange(of: isAscending) { _ in
+            sortItems()
         }
     }
 
@@ -879,9 +909,30 @@ struct SimilarItemsView: View {
                 print("Error fetching similar items: \(error.localizedDescription)")
             }
             DispatchQueue.main.async {
+                self.sortItems()
                 self.isLoading = false
             }
         }.resume()
+    }
+    func sortItems() {
+        switch selectedSortCriteria {
+        case "Name":
+            similarItems.sort { isAscending ? $0.title < $1.title : $0.title > $1.title }
+        case "Price":
+            similarItems.sort { isAscending ?
+                ($0.buyItNowPrice.doubleValue ?? 0) < ($1.buyItNowPrice.doubleValue ?? 0) :
+                ($0.buyItNowPrice.doubleValue ?? 0) > ($1.buyItNowPrice.doubleValue ?? 0) }
+        case "Days Left":
+            // Assuming `timeLeft` can be converted to a Date or time interval for comparison
+            // similarItems.sort { ... }
+            break
+        case "Shipping":
+            // Assuming you have a way to determine shipping comparison
+            // similarItems.sort { ... }
+            break
+        default:
+            break // Default criteria, perhaps reset to original order or do nothing
+        }
     }
 }
 
