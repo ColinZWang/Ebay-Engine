@@ -367,6 +367,31 @@ struct ContentView: View {
             }
         }.resume()
     }
+    
+    func removeFromWishlist(item: SearchResult) {
+        // Replace with your server's actual URL for removing an item from the wishlist
+        guard let url = URL(string: "http://localhost:8080/wishlist/\(item.itemId)") else {
+            print("Invalid URL")
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error making request: \(error)")
+                return
+            }
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+//                DispatchQueue.main.async {
+//                    self.wishlistItems.remove(item.itemId)
+//                }
+                print("Item removed from wishlist")
+            }
+        }.resume()
+    }
+
 }
 
 struct ChecklistToggleStyle: ToggleStyle {
@@ -551,7 +576,7 @@ struct ItemDetailView: View {
                 }
 
             // Similar Tab
-            Text("Similar Items Placeholder")
+            SimilarItemsView(itemId: itemId)
                 .tabItem {
                     Label("Similar", systemImage: "rectangle.on.rectangle")
                 }
@@ -740,6 +765,126 @@ struct PhotosView: View {
         }.resume()
     }
 }
+
+
+// Define your SimilarItem model conforming to Identifiable and Decodable
+struct SimilarItem: Identifiable, Decodable {
+    let id: String
+    let title: String
+    let viewItemURL: String
+    let imageURL: String
+    let timeLeft: String
+    let buyItNowPrice: PriceDetail
+    let shippingCost: PriceDetail
+
+    enum CodingKeys: String, CodingKey {
+        case id = "itemId"
+        case title
+        case viewItemURL
+        case imageURL
+        case timeLeft
+        case buyItNowPrice
+        case shippingCost
+    }
+    
+    struct PriceDetail: Codable {
+        let currencyId: String
+        let value: String
+
+        enum CodingKeys: String, CodingKey {
+            case currencyId = "@currencyId"
+            case value = "__value__"
+        }
+
+        // Helper property to get the price as a double
+        var doubleValue: Double? {
+            return Double(value)
+        }
+    }
+}
+
+
+struct SimilarItemsView: View {
+    let itemId: String
+    @State private var similarItems: [SimilarItem] = []
+    @State private var isLoading = false
+
+    var body: some View {
+        ScrollView {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 160))], spacing: 10) {
+                ForEach(similarItems) { item in
+                    VStack {
+                        AsyncImage(url: URL(string: item.imageURL)) { image in
+                            image.resizable()
+                        } placeholder: {
+                            Color.gray
+                        }
+                        .frame(width: 150, height: 150)
+                        .cornerRadius(10)
+
+                        Text(item.title)
+                            .font(.subheadline)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.center)
+
+                        HStack {
+                            Text("Shipping: $\(item.shippingCost.doubleValue ?? 0.0)")
+                            Spacer()
+                            Text("Time left: \(item.timeLeft)")
+                        }
+                        .font(.caption)
+                        .padding(.horizontal)
+
+                        Text("$\(item.buyItNowPrice.doubleValue ?? 0.0, specifier: "%.2f")")                            .font(.headline)
+                            .foregroundColor(.blue)
+                    }
+                    .frame(width: 160)
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(15)
+                    .shadow(radius: 5)
+                }
+            }
+            .padding(.horizontal)
+        }
+        .onAppear(perform: loadSimilarItems)
+        .navigationTitle("Similar Items")
+        .overlay {
+            if isLoading {
+                ProgressView()
+            }
+        }
+    }
+
+    func loadSimilarItems() {
+        isLoading = true
+        guard let url = URL(string: "http://localhost:8080/similarItems/\(itemId)") else {
+            print("Invalid URL")
+            isLoading = false
+            return
+        }
+
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let data = data {
+                do {
+                    let decodedResponse = try JSONDecoder().decode([SimilarItem].self, from: data)
+                    DispatchQueue.main.async {
+                        self.similarItems = decodedResponse
+                        print("First Similar Item: \(decodedResponse[0]) \n")
+                    }
+                } catch {
+                    print("Decoding error: \(error)")
+                }
+            } else if let error = error {
+                print("Error fetching similar items: \(error.localizedDescription)")
+            }
+            DispatchQueue.main.async {
+                self.isLoading = false
+            }
+        }.resume()
+    }
+}
+
 
 
 struct WishlistView: View {

@@ -337,6 +337,22 @@ app.get('/photos', async (req, res) => {
   }
 });
 
+app.get('/similarItems/:itemId', async (req, res) => {
+  const itemId = req.params.itemId;
+  const ebayURL = `https://svcs.ebay.com/MerchandisingService?OPERATION-NAME=getSimilarItems&SERVICE-NAME=MerchandisingService&SERVICE-VERSION=1.1.0&CONSUMER-ID=${EBAY_API_KEY}&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&itemId=${itemId}&maxResults=20`;
+
+  try {
+      const response = await axios.get(ebayURL);
+      const similarItems = response.data.getSimilarItemsResponse.itemRecommendations.item;
+      console.log("First Similar Item",similarItems[0]);
+      res.json(similarItems);
+  } catch (error) {
+      console.error('Error fetching similar items:', error);
+      res.status(500).send('Internal server error');
+  }
+});
+
+
 
 
 
