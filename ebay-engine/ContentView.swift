@@ -856,12 +856,13 @@ struct SimilarItemsView: View {
                                 .multilineTextAlignment(.center)
                             
                             HStack {
-                                Text("Shipping: $\(item.shippingCost.doubleValue ?? 0.0)")
+                                Text("$\(String(format: "%.2f", item.shippingCost.doubleValue ?? 0.0))")
                                 Spacer()
-                                Text("Time left: \(item.timeLeft)")
+                                Text(formattedTimeLeft(item.timeLeft))
                             }
                             .font(.caption)
                             .padding(.horizontal)
+                            .foregroundColor(.gray)
                             
                             Text("$\(item.buyItNowPrice.doubleValue ?? 0.0, specifier: "%.2f")")                            .font(.headline)
                                 .foregroundColor(.blue)
@@ -885,7 +886,14 @@ struct SimilarItemsView: View {
             sortItems()
         }
     }
-
+    private func formattedTimeLeft(_ timeLeft: String) -> String {
+        if let dayString = timeLeft.split(separator: "D").first?.split(separator: "P").last,
+           let days = Int(dayString) {
+            return "\(days) \(days == 1 ? "day left" : "days left")"
+        }
+        return "N/A"
+    }
+    
     func loadSimilarItems() {
         isLoading = true
         guard let url = URL(string: "http://localhost:8080/similarItems/\(itemId)") else {
