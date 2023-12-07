@@ -923,17 +923,25 @@ struct SimilarItemsView: View {
                 ($0.buyItNowPrice.doubleValue ?? 0) < ($1.buyItNowPrice.doubleValue ?? 0) :
                 ($0.buyItNowPrice.doubleValue ?? 0) > ($1.buyItNowPrice.doubleValue ?? 0) }
         case "Days Left":
-            // Assuming `timeLeft` can be converted to a Date or time interval for comparison
-            // similarItems.sort { ... }
-            break
+            similarItems.sort { isAscending ?
+                extractDays(from: $0.timeLeft) < extractDays(from: $1.timeLeft) :
+                extractDays(from: $0.timeLeft) > extractDays(from: $1.timeLeft) }
         case "Shipping":
-            // Assuming you have a way to determine shipping comparison
-            // similarItems.sort { ... }
-            break
+            similarItems.sort { isAscending ?
+                ($0.shippingCost.doubleValue ?? 0) < ($1.shippingCost.doubleValue ?? 0) :
+                ($0.shippingCost.doubleValue ?? 0) > ($1.shippingCost.doubleValue ?? 0) }
         default:
             break // Default criteria, perhaps reset to original order or do nothing
         }
     }
+
+    // Helper function to extract days from the timeLeft string
+    private func extractDays(from timeLeft: String) -> Int {
+        // Extracting the numeric value between 'P' and 'D'
+        let daysString = timeLeft.split(separator: "D").first?.split(separator: "P").last ?? "0"
+        return Int(daysString) ?? 0
+    }
+
 }
 
 
