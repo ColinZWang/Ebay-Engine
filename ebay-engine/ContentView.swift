@@ -807,38 +807,48 @@ struct SimilarItem: Identifiable, Decodable {
 struct SimilarItemsView: View {
     let itemId: String
     @State private var similarItems: [SimilarItem] = []
+    @State private var originalSimilarItems: [SimilarItem] = [] // Holds the original data
     @State private var isLoading = false
     @State private var selectedSortCriteria = "Default"
-    @State private var isAscending = true
+    @State private var sortOrder = "Ascending"
 
     private let sortCriteria = ["Default", "Name", "Price", "Days Left", "Shipping"]
+    private let sortOrders = ["Ascending", "Descending"]
     
     var body: some View {
         VStack {
             // Sort Criteria Picker
-            Picker("Sort By", selection: $selectedSortCriteria) {
-                ForEach(sortCriteria, id: \.self) {
-                    Text($0)
+            VStack {
+                Text("Sort By")
+                    .font(.headline)
+                    .frame(maxWidth:.infinity, alignment:.leading)
+                Picker("Sort By", selection: $selectedSortCriteria) {
+                    ForEach(sortCriteria, id: \.self) {
+                        Text($0)
+                    }
                 }
+                .pickerStyle(SegmentedPickerStyle())
             }
-            .pickerStyle(SegmentedPickerStyle())
             .padding()
 
-            // Order Buttons
-            HStack {
-                Button("Ascending") {
-                    isAscending = true
+            // Order Picker
+            if selectedSortCriteria != "Default"{
+                VStack {
+                    Text("Order")
+                        .font(.headline)
+                        .frame(maxWidth:.infinity, alignment:.leading)
+                    Picker("Order", selection: $sortOrder) {
+                        ForEach(sortOrders, id: \.self) {
+                            Text($0)
+                        }
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
                 }
-                .foregroundColor(isAscending ? .blue : .gray)
-
-                Button("Descending") {
-                    isAscending = false
-                }
-                .foregroundColor(isAscending ? .gray : .blue)
+                .padding()
             }
 
             // Displaying the items
-            ScrollView{
+            ScrollView {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 160))], spacing: 10) {
                     ForEach(similarItems, id: \.id) { item in
                         VStack {
@@ -864,7 +874,8 @@ struct SimilarItemsView: View {
                             .padding(.horizontal)
                             .foregroundColor(.gray)
                             
-                            Text("$\(item.buyItNowPrice.doubleValue ?? 0.0, specifier: "%.2f")")                            .font(.headline)
+                            Text("$\(item.buyItNowPrice.doubleValue ?? 0.0, specifier: "%.2f")")
+                                .font(.headline)
                                 .foregroundColor(.blue)
                         }
                         .frame(width: 160)
@@ -878,11 +889,10 @@ struct SimilarItemsView: View {
                 .navigationTitle("Similar Items")
             }
         }
-        // Sorting the items based on the selected criteria and order
-        .onChange(of: selectedSortCriteria) { _ in
+        .onChange(of: selectedSortCriteria) {
             sortItems()
         }
-        .onChange(of: isAscending) { _ in
+        .onChange(of: sortOrder) {
             sortItems()
         }
     }
@@ -908,6 +918,7 @@ struct SimilarItemsView: View {
                     let decodedResponse = try JSONDecoder().decode([SimilarItem].self, from: data)
                     DispatchQueue.main.async {
                         self.similarItems = decodedResponse
+                        self.originalSimilarItems = decodedResponse
                         print("First Similar Item: \(decodedResponse[0]) \n")
                     }
                 } catch {
@@ -923,7 +934,10 @@ struct SimilarItemsView: View {
         }.resume()
     }
     func sortItems() {
+        let isAscending = sortOrder == "Ascending"
         switch selectedSortCriteria {
+        case "Default":
+                similarItems = originalSimilarItems
         case "Name":
             similarItems.sort { isAscending ? $0.title < $1.title : $0.title > $1.title }
         case "Price":
