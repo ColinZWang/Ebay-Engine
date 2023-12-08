@@ -16,6 +16,7 @@ struct PhotosView: View {
         ScrollView {
             if isLoading {
                 ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle())
             } else {
                 ForEach(imageLinks, id: \.self) { link in
                     if let url = URL(string: link) {

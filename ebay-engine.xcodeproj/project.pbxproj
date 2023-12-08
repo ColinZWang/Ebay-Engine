@@ -19,6 +19,7 @@
 		7975494E2B2281F3004FA3C3 /* ItemDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7975494D2B2281F3004FA3C3 /* ItemDetailView.swift */; };
 		797549502B228248004FA3C3 /* ShippingInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7975494F2B228248004FA3C3 /* ShippingInfoView.swift */; };
 		797549522B228267004FA3C3 /* WishlistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 797549512B228267004FA3C3 /* WishlistView.swift */; };
+		797549542B22C6AA004FA3C3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 797549532B22C6AA004FA3C3 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +55,7 @@
 		7975494D2B2281F3004FA3C3 /* ItemDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailView.swift; sourceTree = "<group>"; };
 		7975494F2B228248004FA3C3 /* ShippingInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShippingInfoView.swift; sourceTree = "<group>"; };
 		797549512B228267004FA3C3 /* WishlistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WishlistView.swift; sourceTree = "<group>"; };
+		797549532B22C6AA004FA3C3 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +108,7 @@
 			children = (
 				7975491F2B043071004FA3C3 /* ebay_engineApp.swift */,
 				797549212B043071004FA3C3 /* ContentView.swift */,
+				797549532B22C6AA004FA3C3 /* LaunchScreen.storyboard */,
 				797549512B228267004FA3C3 /* WishlistView.swift */,
 				7975494F2B228248004FA3C3 /* ShippingInfoView.swift */,
 				7975494D2B2281F3004FA3C3 /* ItemDetailView.swift */,
@@ -246,6 +249,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				797549542B22C6AA004FA3C3 /* LaunchScreen.storyboard in Resources */,
 				797549272B043072004FA3C3 /* Preview Assets.xcassets in Resources */,
 				797549242B043072004FA3C3 /* Assets.xcassets in Resources */,
 			);

@@ -25,7 +25,8 @@ struct ItemDetailView: View {
             ScrollView{
                 VStack {
                     if isLoading {
-                        Text("Loading...")
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle())
                     } else if let details = productDetails {
                         TabView {
                             ForEach(details.ProductImages, id: \.self) { imageUrl in
