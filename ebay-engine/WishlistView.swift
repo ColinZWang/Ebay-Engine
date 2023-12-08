@@ -53,6 +53,7 @@ struct WishlistView: View {
                     }
                 }
             }
+            .onDelete(perform: deleteItem) // Swipe to delete
         }
         .onAppear(perform: loadWishlist)
         .navigationTitle("Favorites")
@@ -89,5 +90,35 @@ struct WishlistView: View {
         }.resume()
 
     }
+    
+    // Function to delete item from wishlist
+    private func deleteItem(at offsets: IndexSet) {
+        for index in offsets {
+            let itemToDelete = wishlistItems[index]
+            // Implement logic to delete the item from the server
+            removeFromWishlist(item: itemToDelete)
+        }
+        wishlistItems.remove(atOffsets: offsets)
+    }
 
+    // Remove item from wishlist on server
+    func removeFromWishlist(item: WishlistItem) {
+        guard let url = URL(string: "http://localhost:8080/wishlist/\(item.id)") else {
+            print("Invalid URL")
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error making request: \(error)")
+                return
+            }
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                print("Item removed from wishlist")
+            }
+        }.resume()
+    }
 }
