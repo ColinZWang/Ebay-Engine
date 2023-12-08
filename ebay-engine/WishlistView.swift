@@ -10,9 +10,27 @@ import SwiftUI
 struct WishlistView: View {
     @State private var wishlistItems: [WishlistItem] = []
     @State private var isLoading = false
+    
+    private var itemCount: Int {
+        wishlistItems.count
+    }
+
+    // Computed property to calculate total price
+    private var totalPrice: Double {
+        wishlistItems.reduce(0) { total, item in
+            total + (Double(item.price) ?? 0.0)
+        }
+    }
 
     var body: some View {
         List {
+            HStack{
+                Text("Wishlist total(\(itemCount)) Items: ")
+                Spacer()
+                Text("$\(String(format: "%.2f", totalPrice))")
+            }
+            .frame(maxWidth: .infinity)
+            
             ForEach(wishlistItems, id: \.id) { item in
                 NavigationLink(destination: ItemDetailView(itemId: item.itemId, shippingCost: item.shipping)) {
                     HStack {
