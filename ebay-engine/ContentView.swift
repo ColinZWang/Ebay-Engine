@@ -229,11 +229,19 @@ struct ContentView: View {
                                 VStack{
                                     Spacer()
                                     Button(action: {
-                                        addToWishlist(item: result)
+                                        if let index = searchResults.firstIndex(where: { $0.id == result.id }) {
+                                            searchResults[index].isFavorite.toggle() // Toggle the favorite status
+                                            if searchResults[index].isFavorite {
+                                                addToWishlist(item: result)
+                                            } else {
+                                                removeFromWishlist(item: result)
+                                            }
+                                        }
                                     }) {
-                                        Image(systemName: "heart")
+                                        Image(systemName: result.isFavorite ? "heart.fill" : "heart")
                                             .foregroundColor(.red)
-                                    }.buttonStyle(PlainButtonStyle())
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
                                     Spacer()
                                     Text(result.condition ?? "N/A")
                                         .foregroundColor(.gray)
@@ -369,8 +377,7 @@ struct ContentView: View {
     }
     
     func removeFromWishlist(item: SearchResult) {
-        // Replace with your server's actual URL for removing an item from the wishlist
-        guard let url = URL(string: "http://localhost:8080/wishlist/\(item.itemId)") else {
+        guard let url = URL(string: "http://localhost:8080/wishlist/\(item.id)") else {
             print("Invalid URL")
             return
         }
@@ -384,9 +391,6 @@ struct ContentView: View {
                 return
             }
             if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
-//                DispatchQueue.main.async {
-//                    self.wishlistItems.remove(item.itemId)
-//                }
                 print("Item removed from wishlist")
             }
         }.resume()
@@ -426,7 +430,13 @@ struct SearchResult: Identifiable, Decodable {
     let shipping: String?
     let zip: String?
     let condition: String?
+    var isFavorite: Bool = false
+    
+    enum CodingKeys: String, CodingKey {
+        case itemId, image, title, price, shipping, zip, condition
+    }
 }
+
 
 struct ProductDetails: Codable {
     let Title: String
